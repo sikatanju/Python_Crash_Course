@@ -9,6 +9,7 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from button import Button
+from scoreboard import Scoreboard
 
 class AlienInvasion:  #  * """This is main class to manage game assets and behavior."""
 
@@ -38,6 +39,8 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
 
         #* Instance of Game Stats:
         self.stats = GameStats(self)
+        
+        self.sb = Scoreboard(self)
 
     def run_game(self): # * Start the main loop for the game.
         while True:
@@ -91,10 +94,19 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
 
     def _check_alien_bullet_collision(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            
+            self.sb.prep_score()
+            self.sb.check_high_score()
+         
         if not self.aliens:
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+            self.sb.prep_level()
 
     def _check_keydown_events(self, event):
         if event.key == pygame.K_RIGHT:
@@ -123,6 +135,8 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
 
         self.ship.blitme()
         self.aliens.draw(self.screen)
+
+        self.sb.show_score()
 
         if not self.game_active:
             self.play_button.draw_button()
@@ -200,12 +214,15 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
 
     def _check_play_button(self, mouse_pos):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        
         if button_clicked and not self.game_active:
             self.settings.initialize_dynamic_settings()
             self._start_game()
 
     def _start_game(self):
         self.stats.reset_stats()
+        self.sb.prep_score()
+        self.sb.prep_level()
         self.game_active = True
         self.bullets.empty()
         self.aliens.empty()
