@@ -196,6 +196,7 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
         if self.stats.ships_left > 0:
             self.bullets.empty()
             self.aliens.empty()
+            self.sb.prep_ship()
 
             self._create_fleet()
             self.ship.center_ship()
@@ -217,6 +218,7 @@ class AlienInvasion:  #  * """This is main class to manage game assets and behav
         
         if button_clicked and not self.game_active:
             self.settings.initialize_dynamic_settings()
+            self.sb.prep_ship()
             self._start_game()
 
     def _start_game(self):
